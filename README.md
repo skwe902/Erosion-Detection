@@ -29,3 +29,8 @@ Finally, the GeoTiff file is converted into shapely polygons.
 <img src = "https://user-images.githubusercontent.com/63220455/151878541-4245ed99-4935-4d6f-98b0-936c7804dddb.png"> <br />
 Fig 3. Polygon overlayed on top of google map in QGIS
 </p>
+
+## Note:
+The trained model that I made (.h5 file) is not included due to size limitations of Github and my internship contract. <br />
+The model I used was U-Net, and there are plenty of resources online on binary segmantaion which you can use to recreate the model. <br />
+To see the results / performance of the model, I have included [Results.pdf](https://github.com/skwe902/Erosion-Detection/blob/main/Results.pdf) file which contains the test results of the model. 
