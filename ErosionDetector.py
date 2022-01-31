@@ -7,7 +7,8 @@ from tensorflow.keras.models import load_model
 import rasterio
 from rasterio.transform import from_origin
 from pyproj import CRS
-#import matplotlib.pyplot as plt
+from osgeo import gdal, ogr
+import sys
 
 #API Documentation: https://services1.arcgisonline.co.nz/arcgis/sdk/rest/index.html#//02ss00000062000000
 #Export Map URL: https://services1.arcgisonline.co.nz/arcgis/rest/services/Imagery/newzealand/MapServer/export
@@ -17,6 +18,7 @@ def main():
     imageDirectory = 'C:/Users/skwe9/Desktop/getImages/image.png'
     modelDirectory = "C:/Users/skwe9/Desktop/SavedModel.h5"
     tifDirectory = 'C:/Users/skwe9/Desktop/test1.tif'
+    polygonDirectory = "C:/Users/skwe9/Desktop/POLYGONIZED_STUFF"
     url = 'https://services1.arcgisonline.co.nz/arcgis/rest/services/Imagery/newzealand/MapServer/export'
     tilesize = (256,256) #the size we want to chunk the images
 
@@ -28,49 +30,62 @@ def main():
         'f': 'image'
     }
 
+    # Prepare the image
     get_image(url, imageDirectory, data)
-
     image = Image.open(imageDirectory).convert("RGB")
     image = np.asarray(image) #(4096, 4096, 3) - RGB image sized 4096x4096 pixels
-
     tiles = split_image(image, tilesize) #(256,256,256,3) - 256 RGB images sized 256x256 pixels
 
-    model = load_model(modelDirectory, custom_objects={"focal_tversky":focal_tversky,"tversky":tversky,"tversky_loss":tversky_loss})
-    
+    # Normalize the image
     images_list = []
-
     for i in range(256):
         images_list.append(tiles[i]/255) #normalize the image pixel values from (0~255) to (0~1)
         x = np.asarray(images_list)
 
-    result = model.predict(x) #(256,256,256,1)
-    result = (result > 0.5).astype(int) #set a threshold - anything above becomes 1
+    # Make Predictions
+    model = load_model(modelDirectory, custom_objects={"focal_tversky":focal_tversky,"tversky":tversky,"tversky_loss":tversky_loss})
+    result = model.predict(x) #(256,256,256,1) - 256 2D arrays sized 256x256
+    result = (result > 0.5).astype(int) #set a threshold - anything above 0.5 becomes 1
 
-    # Combine the images together
+    # Combine the result arrays into one giant array
     combinedArray = np.hstack(result) #(256, 65536, 1)
-    newArray = np.hsplit(combinedArray, 16)
+    newArray = np.hsplit(combinedArray, 16) #65536/16 = 4096
     newArray = np.vstack(newArray) #(4096, 4096, 1)
     result = np.squeeze(newArray) #(4096, 4096)
-    # plt.imshow(result)
-    # plt.show()
 
     # Write the result to a GeoTiff file
     #Source: https://gis.stackexchange.com/questions/279953/numpy-array-to-gtiff-using-rasterio-without-source-raster
-    transform = from_origin(1905111.347, 5800115.650, 0.244140625, 0.244140625)
+    transform = from_origin(1905111.347, 5800115.650, 0.244140625, 0.244140625) #(top left corner x, top left corner y, 1000/4096, 1000/4096)
     new_dataset = rasterio.open(tifDirectory, 'w', driver='GTiff', height=result.shape[0], width=result.shape[1], count=1, dtype=str(result.dtype),
                             crs=CRS.from_epsg(2193),
                             transform=transform)
-
     new_dataset.write(result, indexes=1)
     new_dataset.close()
+
+    # Polygonize a raster band
+    #source: https://pcjericks.github.io/py-gdalogr-cookbook/raster_layers.html#polygonize-a-raster-band
+    src_ds = gdal.Open(tifDirectory)
+    if src_ds is None:
+        print ('Unable to open file')
+        sys.exit(1)
+    else:
+        srcband = src_ds.GetRasterBand(1)
+
+    # create output datasource
+    drv = ogr.GetDriverByName("ESRI Shapefile")
+    dst_ds = drv.CreateDataSource( polygonDirectory + ".shp" )
+    dst_layer = dst_ds.CreateLayer( polygonDirectory, srs = None )
+
+    gdal.Polygonize( srcband, None, dst_layer, -1, [], callback=None )
+
 
 
 #Functions used for main():
 def get_image(url: str, directory: str, data: dict):
     recieve = requests.get(url, params=data)
-    if recieve.status_code == 200: #if the request has succeeded
+    if recieve.status_code == 200: 
         with open(f'{directory}','wb') as f:
-            f.write(recieve.content) #save the file to computer
+            f.write(recieve.content) 
 
 def split_image(image: np.ndarray, kernel_size: tuple):
     #Source: https://towardsdatascience.com/efficiently-splitting-an-image-into-tiles-in-python-using-numpy-d1bf0dd7b6f7
