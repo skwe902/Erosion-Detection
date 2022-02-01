@@ -30,6 +30,11 @@ Finally, the GeoTiff file is converted into shapely polygons.
 Fig 3. Polygon overlayed on top of google map in QGIS
 </p>
 
+<p align="center">
+<img src = "https://user-images.githubusercontent.com/63220455/151910115-cdb376fd-4bfd-47b7-a145-70dff2047d92.png"> <br />
+Fig 3. Polygon with background class removed
+</p>
+
 ## Note:
 The trained model that I made (.h5 file) is not included due to size limitations of Github and my internship contract. <br />
 The model I used was U-Net, and there are plenty of resources online on binary segmantaion which you can use to recreate the model. <br />
