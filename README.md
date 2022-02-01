@@ -27,12 +27,12 @@ Fig 3. GeoTiff file opened in QGIS
 Finally, the GeoTiff file is converted into shapely polygons.
 <p align="center">
 <img src = "https://user-images.githubusercontent.com/63220455/151878541-4245ed99-4935-4d6f-98b0-936c7804dddb.png"> <br />
-Fig 3. Polygon overlayed on top of google map in QGIS
+Fig 4. Polygon overlayed on top of google map in QGIS
 </p>
 
 <p align="center">
 <img src = "https://user-images.githubusercontent.com/63220455/151910115-cdb376fd-4bfd-47b7-a145-70dff2047d92.png"> <br />
-Fig 3. Polygon with background class removed
+Fig 5. Polygon with background class removed
 </p>
 
 ## Note:
