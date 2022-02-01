@@ -1,4 +1,3 @@
-from signal import strsignal
 import requests
 from PIL import Image
 import numpy as np
