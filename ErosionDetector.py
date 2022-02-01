@@ -1,3 +1,4 @@
+from signal import strsignal
 import requests
 from PIL import Image
 import numpy as np
@@ -7,7 +8,7 @@ from tensorflow.keras.models import load_model
 import rasterio
 from rasterio.transform import from_origin
 from pyproj import CRS
-from osgeo import gdal, ogr
+from osgeo import gdal, ogr, osr
 import sys
 
 #API Documentation: https://services1.arcgisonline.co.nz/arcgis/sdk/rest/index.html#//02ss00000062000000
@@ -71,12 +72,18 @@ def main():
     else:
         srcband = src_ds.GetRasterBand(1)
 
+    srs = osr.SpatialReference()
+    srs.ImportFromEPSG(2193)
+
     # create output datasource
+    #Source: https://gis.stackexchange.com/questions/279032/output-field-name-when-using-gdal-polygonize-in-python
     drv = ogr.GetDriverByName("ESRI Shapefile")
     dst_ds = drv.CreateDataSource( polygonDirectory + ".shp" )
-    dst_layer = dst_ds.CreateLayer( polygonDirectory, srs = None )
-
-    gdal.Polygonize( srcband, None, dst_layer, -1, [], callback=None )
+    dst_layer = dst_ds.CreateLayer( polygonDirectory, srs = srs )
+    fd = ogr.FieldDefn("DN", ogr.OFTInteger)
+    dst_layer.CreateField(fd)
+    dst_field = dst_layer.GetLayerDefn().GetFieldIndex("DN")
+    gdal.Polygonize( srcband, srcband, dst_layer, dst_field, [], callback=None )
 
 
 
