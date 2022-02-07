@@ -84,8 +84,6 @@ def main():
         #Source: https://gis.stackexchange.com/questions/279953/numpy-array-to-gtiff-using-rasterio-without-source-raster
         tifDirectory = mainDirectory + 'L' + str(count) + ".tif" #L0.tif, L1.tif etc.
         print(tifDirectory)
-        # transformer = Transformer.from_crs('epsg:2193', 'epsg:4326', always_xy=True)
-        # topLeftX, topLeftY = transformer.transform(topLeftX, topLeftY)
         transform = from_origin(topLeftX, topLeftY, 0.244140625, 0.244140625) #(top left corner x, top left corner y, 1000/4096, 1000/4096)
         new_dataset = rasterio.open(tifDirectory, 'w', driver='GTiff', height=result.shape[0], width=result.shape[1], count=1, dtype=str(result.dtype),
                                 crs=CRS.from_epsg(2193),
