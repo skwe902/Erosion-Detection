@@ -36,6 +36,6 @@ Fig 5. Polygon with background class removed
 </p>
 
 ## Note:
-The trained model that I made (.h5 file) is not included due to size limitations of Github and my internship contract. <br />
+The trained model and the python script that I made is not included due to size limitations of Github and my internship contract. <br />
 The model I used was U-Net, and there are plenty of resources online on binary segmantaion which you can use to recreate the model. <br />
 To see the results / performance of the model, I have included [Results.pdf](https://github.com/skwe902/Erosion-Detection/blob/main/Results.pdf) file which contains the test results of the model. 
