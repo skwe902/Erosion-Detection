@@ -2,8 +2,10 @@
 
 Written by **Andy Kweon** <br />
 
+### See Andy's Presentation.pdf which shows the overview of the project and the implementation
+
 ## Aim of the project:
-To detect sediment loss from aerial images of hills around the Bay of Plenty region through ML model.
+To detect sediment loss from aerial images of hills around the Bay of Plenty region through ML model. 
 
 ## High-level overview of the code:
 The python script first makes a GET request to the ArcGIS online services to get a 4096 x 4096 sized image. 
